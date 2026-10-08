@@ -1,0 +1,34 @@
+[project]
+name = "devlab-guard"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Yuvaraj Pattabi", email = "yuva.devlab@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.143.0",
+    "httpx>=0.28.1",
+    "pydantic>=2.0.0",
+    "rich>=15.0.0",
+    "tree-sitter>=0.22.0",
+    "tree-sitter-go>=0.25.0",
+    "tree-sitter-python>=0.25.0",
+    "tree-sitter-typescript>=0.23.2",
+    "typer>=0.27.3",
+    "uvicorn>=0.54.0",
+]
+
+[project.scripts]
+devlab-guard = "devlab_guard.cli:main"
+devlab = "devlab_guard.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.12.23,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.10",
+]
