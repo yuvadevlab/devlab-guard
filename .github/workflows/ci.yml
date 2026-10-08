@@ -1,0 +1,73 @@
+name: 🛡️ CI Pipeline — DevLab Guard
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    name: 🎨 Verify Formatting with Ruff
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ⚡ Setup uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: 🐍 Install Python Dependencies
+        run: uv sync --locked
+
+      - name: 🎨 Run Ruff Format Check
+        run: uv run ruff format --check .
+
+  lint:
+    name: 🧹 Lint with Ruff
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ⚡ Setup uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: 🐍 Install Python Dependencies
+        run: uv sync --locked
+
+      - name: 🧹 Run Ruff Linter
+        run: uv run ruff check .
+
+  cli-smoke:
+    name: 🚀 CLI Smoke Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ⚡ Setup uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: 🐍 Install Python Dependencies
+        run: uv sync --locked
+
+      - name: 🚀 Run CLI Help
+        run: uv run python -m devlab_guard.cli --help
