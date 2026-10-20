@@ -6,6 +6,7 @@ Module: devlab_guard.rules.jsdoc_rule
 from tree_sitter import Node, Tree
 
 from devlab_guard.core.models import Severity, Violation, ViolationCategory
+from devlab_guard.ui_copy import RULES
 
 
 def _has_preceding_jsdoc(node: Node, source_bytes: bytes) -> bool:
@@ -52,8 +53,8 @@ def _evaluate_ts_jsdoc(root_node: Node, source_bytes: bytes, file_path: str) -> 
                         file_path=file_path,
                         line_number=child.start_point.row + 1,
                         column=child.start_point.column,
-                        message=f"Exported symbol '{symbol_name}' is missing a JSDoc docstring block.",
-                        suggested_fix=f"Add a '/** ... */' JSDoc comment describing '{symbol_name}' parameters and return contract.",
+                        message=RULES["JS_TS_MESSAGE"](symbol_name),
+                        suggested_fix=RULES["JS_TS_FIX"](symbol_name),
                         code_snippet=source_bytes[
                             child.start_byte : min(child.start_byte + 80, child.end_byte)
                         ].decode("utf-8", "ignore"),
@@ -103,8 +104,8 @@ def _evaluate_py_docstrings(
                         file_path=file_path,
                         line_number=child.start_point.row + 1,
                         column=child.start_point.column,
-                        message=f"Python definition '{name}' lacks a comprehensive docstring.",
-                        suggested_fix=f"Add a triple-quoted docstring at the top of '{name}'.",
+                        message=RULES["JS_PY_MESSAGE"](name),
+                        suggested_fix=RULES["JS_PY_FIX"](name),
                     )
                 )
 

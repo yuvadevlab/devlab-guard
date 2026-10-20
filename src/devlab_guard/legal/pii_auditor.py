@@ -6,6 +6,7 @@ Module: devlab_guard.legal.pii_auditor
 import re
 
 from devlab_guard.core.models import Severity, Violation, ViolationCategory
+from devlab_guard.ui_copy import LEGAL
 
 SSN_REGEX = re.compile(r"\b(?!000|666|9\d{2})\d{3}-(?!00)\d{2}-(?!0000)\d{4}\b")
 CARD_REGEX = re.compile(r"\b(?:\d[ -]*?){13,16}\b")
@@ -44,8 +45,8 @@ def scan_pii(file_path: str, content: str) -> list[Violation]:
                     file_path=file_path,
                     line_number=line_idx,
                     column=ssn_match.start(),
-                    message="Hardcoded Social Security Number (SSN) detected in source code.",
-                    suggested_fix="Mask or redact SSN identifier immediately.",
+                    message=LEGAL["SSN_MESSAGE"],
+                    suggested_fix=LEGAL["SSN_FIX"],
                     code_snippet=line.strip()[:80],
                 )
             )
@@ -62,8 +63,8 @@ def scan_pii(file_path: str, content: str) -> list[Violation]:
                         file_path=file_path,
                         line_number=line_idx,
                         column=card_match.start(),
-                        message="Valid Payment Card Number detected in source code.",
-                        suggested_fix="Mask or tokenize primary account number (PAN) per PCI-DSS standards.",
+                        message=LEGAL["CARD_MESSAGE"],
+                        suggested_fix=LEGAL["CARD_FIX"],
                         code_snippet=line.strip()[:80],
                     )
                 )

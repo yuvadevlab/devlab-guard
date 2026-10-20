@@ -6,14 +6,18 @@ Module: devlab_guard.security.prompt_safety
 import re
 
 from devlab_guard.core.models import Severity, Violation, ViolationCategory
+from devlab_guard.ui_copy import SECURITY
 
 # Patterns indicating unescaped user prompt injection risks in system templates
 PROMPT_INJECTION_RISK_PATTERNS = [
     (
         r"system_prompt\s*=\s*f?['\"].*?\{user_input\}",
-        "Unsanitized user_input interpolation in system prompt",
+        SECURITY["PROMPT_LABELS"]["UNSANITIZED_INPUT"],
     ),
-    (r"You are an AI.*?\$\{input\}", "Unbounded template interpolation in instruction prompt"),
+    (
+        r"You are an AI.*?\$\{input\}",
+        SECURITY["PROMPT_LABELS"]["UNBOUNDED_INTERPOLATION"],
+    ),
 ]
 
 
@@ -34,8 +38,8 @@ def scan_prompt_safety(file_path: str, content: str) -> list[Violation]:
                         file_path=file_path,
                         line_number=line_idx,
                         column=match.start(),
-                        message=f"Prompt injection vulnerability: {desc}.",
-                        suggested_fix="Isolate user content within explicit delimiters (e.g. <user_query> tags) and sanitize inputs.",
+                        message=SECURITY["PROMPT_MESSAGE"](desc),
+                        suggested_fix=SECURITY["PROMPT_FIX"],
                         code_snippet=line.strip()[:80],
                     )
                 )
