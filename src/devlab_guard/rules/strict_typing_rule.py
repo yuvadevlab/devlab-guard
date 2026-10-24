@@ -6,6 +6,7 @@ Module: devlab_guard.rules.strict_typing_rule
 from tree_sitter import Node, Tree
 
 from devlab_guard.core.models import Severity, Violation, ViolationCategory
+from devlab_guard.ui_copy import RULES
 
 
 def _find_any_types(
@@ -23,8 +24,8 @@ def _find_any_types(
                     file_path=file_path,
                     line_number=node.start_point.row + 1,
                     column=node.start_point.column,
-                    message="Forbidden 'any' type annotation detected. Use strict generic or domain types.",
-                    suggested_fix="Replace 'any' with a concrete interface, type union, or 'unknown' with type guards.",
+                    message=RULES["ANY_MESSAGE"],
+                    suggested_fix=RULES["ANY_FIX"],
                     code_snippet=source_bytes[
                         max(0, node.start_byte - 15) : min(len(source_bytes), node.end_byte + 15)
                     ].decode("utf-8", "ignore"),

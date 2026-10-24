@@ -8,6 +8,7 @@ from pathlib import Path
 
 from devlab_guard.core.config import FORBIDDEN_LICENSES
 from devlab_guard.core.models import Severity, Violation, ViolationCategory
+from devlab_guard.ui_copy import LEGAL
 
 
 def audit_package_json(package_json_path: Path | str) -> list[Violation]:
@@ -38,8 +39,8 @@ def audit_package_json(package_json_path: Path | str) -> list[Violation]:
                     file_path=str(path),
                     line_number=1,
                     column=0,
-                    message=f"Forbidden copyleft license declared: '{declared_license}'. Contaminates enterprise distribution.",
-                    suggested_fix="Re-license package under an approved permissive license: MIT or Apache-2.0.",
+                    message=LEGAL["LICENSE_MESSAGE"](declared_license),
+                    suggested_fix=LEGAL["LICENSE_FIX"],
                 )
             )
     except Exception as err:
@@ -51,7 +52,7 @@ def audit_package_json(package_json_path: Path | str) -> list[Violation]:
                 file_path=str(path),
                 line_number=1,
                 column=0,
-                message=f"Failed to parse package.json for license auditing: {err}",
+                message=LEGAL["LICENSE_PARSE"](err),
             )
         )
 

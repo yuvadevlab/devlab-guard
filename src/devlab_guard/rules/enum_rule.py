@@ -6,6 +6,7 @@ Module: devlab_guard.rules.enum_rule
 from tree_sitter import Node, Tree
 
 from devlab_guard.core.models import Severity, Violation, ViolationCategory
+from devlab_guard.ui_copy import RULES
 
 FORBIDDEN_RAW_STATUS_STRINGS: set[str] = {
     '"completed"',
@@ -46,8 +47,8 @@ def _check_string_comparisons(
                                 file_path=file_path,
                                 line_number=child.start_point.row + 1,
                                 column=child.start_point.column,
-                                message=f"Raw domain string literal {text} used in equality comparison. Use canonical enum.",
-                                suggested_fix="Replace with Enum.KEY (e.g. ExecutionStatus.COMPLETED or Role.ADMIN).",
+                                message=RULES["ENUM_MESSAGE"](text),
+                                suggested_fix=RULES["ENUM_FIX"],
                                 code_snippet=source_bytes[node.start_byte : node.end_byte].decode(
                                     "utf-8", "ignore"
                                 ),

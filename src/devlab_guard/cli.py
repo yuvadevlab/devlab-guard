@@ -12,10 +12,11 @@ from rich.table import Table
 
 from devlab_guard.core.models import Severity
 from devlab_guard.core.pipeline import run_pipeline
+from devlab_guard.ui_copy import CLI
 
 app = typer.Typer(
     name="guard",
-    help="DevLab Guard — Autonomous AI Reviewer & AST Policy Enforcer",
+    help=CLI["APP_HELP"],
     no_args_is_help=True,
 )
 console = Console()
@@ -23,24 +24,20 @@ console = Console()
 
 @app.command(name="check")
 def check(
-    path: str = typer.Argument(".", help="Target directory or file path to evaluate"),
-    fix: bool = typer.Option(
-        False, "--fix", "-f", help="Attempt semantic LLM auto-patch via local Ollama"
-    ),
-    json_output: bool = typer.Option(
-        False, "--json", "-j", help="Output full report in raw JSON format"
-    ),
+    path: str = typer.Argument(".", help=CLI["TARGET_HELP"]),
+    fix: bool = typer.Option(False, "--fix", "-f", help=CLI["FIX_HELP"]),
+    json_output: bool = typer.Option(False, "--json", "-j", help=CLI["JSON_HELP"]),
     severity: str | None = typer.Option(
         None,
         "--severity",
         "-s",
-        help="Filter violations by minimum severity (INFO, WARNING, ERROR, CRITICAL)",
+        help=CLI["SEVERITY_HELP"],
     ),
 ) -> None:
     """Evaluates target files against architectural, typing, security, and legal invariants."""
     target_path = Path(path)
     if not target_path.exists():
-        console.print(f"[bold red]Error:[/bold red] Target path '{path}' does not exist.")
+        console.print(CLI["MISSING_PATH"].format(path=path))
         raise typer.Exit(code=1)
 
     report = run_pipeline(target_path, auto_fix=fix)
@@ -56,24 +53,25 @@ def check(
         violations = [v for v in violations if v.severity.value == sev_upper]
 
     console.print()
-    console.print("[bold blue]🛡️  DevLab Guard — Autonomous Policy Evaluation[/bold blue]")
+    console.print(CLI["BANNER"])
     console.print(
-        f"Scanned [bold]{report.total_files_scanned}[/bold] files in [cyan]{report.execution_time_ms}ms[/cyan]."
+        CLI["SCAN_SUMMARY"].format(
+            total=report.total_files_scanned,
+            duration=report.execution_time_ms,
+        )
     )
     console.print()
 
     if not violations:
-        console.print(
-            "[bold green]✅ All architectural and security invariant gates passed with 0 violations![/bold green]\n"
-        )
+        console.print(CLI["PASSED"])
         sys.exit(0)
 
     # Render Rich formatted table
-    table = Table(title="Detected Policy Violations", show_header=True, header_style="bold magenta")
-    table.add_column("Rule", style="cyan", width=9)
-    table.add_column("Severity", width=10)
-    table.add_column("Location", style="yellow")
-    table.add_column("Description", style="white")
+    table = Table(title=CLI["TABLE_TITLE"], show_header=True, header_style="bold magenta")
+    table.add_column(CLI["COLUMN_RULE"], style="cyan", width=9)
+    table.add_column(CLI["COLUMN_SEVERITY"], width=10)
+    table.add_column(CLI["COLUMN_LOCATION"], style="yellow")
+    table.add_column(CLI["COLUMN_DESCRIPTION"], style="white")
 
     severity_colors = {
         Severity.CRITICAL: "[bold red]CRITICAL[/bold red]",
@@ -91,20 +89,14 @@ def check(
     console.print()
 
     if report.suggested_diff_patch:
-        console.print(
-            "[bold magenta]✨ Suggested Unified Git Diff Patch from Ollama:[/bold magenta]"
-        )
-        console.print(f"```diff\n{report.suggested_diff_patch}\n```\n")
+        console.print(CLI["PATCH_TITLE"])
+        console.print(CLI["PATCH_FORMAT"].format(patch=report.suggested_diff_patch))
 
     if not report.passed:
-        console.print(
-            f"[bold red]❌ Quality Gate FAILED with {report.total_violations} violations.[/bold red]\n"
-        )
+        console.print(CLI["FAILED"].format(count=report.total_violations))
         sys.exit(1)
     else:
-        console.print(
-            "[bold yellow]⚠️ Completed with advisory warnings only (Non-blocking).[/bold yellow]\n"
-        )
+        console.print(CLI["WARNINGS"])
         sys.exit(0)
 
 

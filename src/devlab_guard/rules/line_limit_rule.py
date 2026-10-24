@@ -6,6 +6,7 @@ Module: devlab_guard.rules.line_limit_rule
 from devlab_guard.core.config import MAX_FILE_LINES, WARNING_FILE_LINES
 from devlab_guard.core.models import Severity, Violation, ViolationCategory
 from devlab_guard.parser.line_counter import count_lines
+from devlab_guard.ui_copy import RULES
 
 
 def evaluate_line_limit(file_path: str, content: str, language: str) -> list[Violation]:
@@ -32,12 +33,11 @@ def evaluate_line_limit(file_path: str, content: str, language: str) -> list[Vio
                 file_path=file_path,
                 line_number=MAX_FILE_LINES + 1,
                 column=0,
-                message=(
-                    f"Hard 250-line rule exceeded: File has {counts.total_lines} lines "
-                    f"({counts.executable_lines} executable statements). "
-                    "Decompose into focused sub-modules immediately."
+                message=RULES["LINE_LIMIT_MESSAGE"](
+                    counts.total_lines,
+                    counts.executable_lines,
                 ),
-                suggested_fix="Extract internal helper classes or handlers into dedicated sub-files.",
+                suggested_fix=RULES["LINE_LIMIT_FIX"],
             )
         )
     # 2. Advisory warning: between 200 and 250 lines triggers proactive refactoring notice
@@ -50,11 +50,8 @@ def evaluate_line_limit(file_path: str, content: str, language: str) -> list[Vio
                 file_path=file_path,
                 line_number=WARNING_FILE_LINES + 1,
                 column=0,
-                message=(
-                    f"File approaching line threshold: {counts.total_lines} lines. "
-                    "Plan decomposition to prevent hard failure at 250 lines."
-                ),
-                suggested_fix="Review file for potential separation of concerns.",
+                message=RULES["LINE_WARNING"](counts.total_lines),
+                suggested_fix=RULES["LINE_WARNING_FIX"],
             )
         )
 
