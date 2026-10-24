@@ -3,7 +3,13 @@
 Module: devlab_guard.core.config
 """
 
+import os
 from typing import Final
+
+# DevLab Ecosystem Service Configuration
+DEVLAB_PORTAL_API_URL: Final[str] = os.getenv("DEVLAB_PORTAL_API_URL", "http://localhost:3015")
+DEVLAB_GUARD_API_KEY: Final[str] = os.getenv("DEVLAB_GUARD_API_KEY", "")
+PORT: Final[int] = int(os.getenv("PORT", "8000"))
 
 # Hard limits for code cleanliness and modularity
 MAX_FILE_LINES: Final[int] = 250

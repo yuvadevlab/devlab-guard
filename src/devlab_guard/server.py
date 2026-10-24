@@ -10,10 +10,11 @@ from pydantic import BaseModel, Field
 
 from devlab_guard.core.models import GuardReport
 from devlab_guard.core.pipeline import run_pipeline
+from devlab_guard.ui_copy import API
 
 app = FastAPI(
-    title="DevLab Guard API",
-    description="Automated Security & Architecture Policy Reviewer",
+    title=API["TITLE"],
+    description=API["DESCRIPTION"],
     version="1.0.0",
 )
 
@@ -21,8 +22,8 @@ app = FastAPI(
 class ScanRequest(BaseModel):
     """Payload specifying file or directory to scan."""
 
-    target_path: str = Field(description="Local file or directory path")
-    auto_fix: bool = Field(default=False, description="Attempt automated LLM fix")
+    target_path: str = Field(description=API["TARGET_PATH"])
+    auto_fix: bool = Field(default=False, description=API["AUTO_FIX"])
 
 
 class HealthResponse(BaseModel):
@@ -44,7 +45,8 @@ def scan_endpoint(request: ScanRequest) -> GuardReport:
     target = Path(request.target_path)
     if not target.exists():
         raise HTTPException(
-            status_code=404, detail=f"Target path '{request.target_path}' not found"
+            status_code=404,
+            detail=API["MISSING_PATH"].format(path=request.target_path),
         )
 
     return run_pipeline(target, auto_fix=request.auto_fix)

@@ -8,14 +8,18 @@ import re
 
 from devlab_guard.core.config import SHANNON_ENTROPY_THRESHOLD
 from devlab_guard.core.models import Severity, Violation, ViolationCategory
+from devlab_guard.ui_copy import SECURITY
 
 # Known credential prefixes and signature regexes
 SECRET_PATTERNS: list[tuple[str, str]] = [
-    (r"dlk_(?:live|dev)_[a-zA-Z0-9]{32,}", "DevLab Platform API Key"),
-    (r"sk-[a-zA-Z0-9]{32,}", "OpenAI / Cloud Secret Key"),
-    (r"ghp_[a-zA-Z0-9]{36}", "GitHub Personal Access Token"),
-    (r"AKIA[0-9A-Z]{16}", "AWS Access Key Identifier"),
-    (r"-----BEGIN (?:RSA |EC )?PRIVATE KEY-----", "Raw Private Key PEM Block"),
+    (r"dlk_(?:live|dev)_[a-zA-Z0-9]{32,}", SECURITY["SECRET_LABELS"]["DEVLAB_KEY"]),
+    (r"sk-[a-zA-Z0-9]{32,}", SECURITY["SECRET_LABELS"]["OPENAI_KEY"]),
+    (r"ghp_[a-zA-Z0-9]{36}", SECURITY["SECRET_LABELS"]["GITHUB_TOKEN"]),
+    (r"AKIA[0-9A-Z]{16}", SECURITY["SECRET_LABELS"]["AWS_KEY"]),
+    (
+        r"-----BEGIN (?:RSA |EC )?PRIVATE KEY-----",
+        SECURITY["SECRET_LABELS"]["PRIVATE_KEY"],
+    ),
 ]
 
 
@@ -50,8 +54,8 @@ def scan_for_secrets(file_path: str, content: str) -> list[Violation]:
                         file_path=file_path,
                         line_number=line_idx,
                         column=match.start(),
-                        message=f"Hardcoded credential detected: {desc}.",
-                        suggested_fix="Store credential in .env or cloud secret vault and load via environment variable.",
+                        message=SECURITY["SECRET_MESSAGE"](desc),
+                        suggested_fix=SECURITY["SECRET_FIX"],
                         code_snippet=line.strip()[:80],
                     )
                 )
@@ -72,8 +76,8 @@ def scan_for_secrets(file_path: str, content: str) -> list[Violation]:
                             file_path=file_path,
                             line_number=line_idx,
                             column=string_match.start(),
-                            message=f"High-entropy token detected (entropy {entropy:.2f}): possible secret leak.",
-                            suggested_fix="Ensure high-entropy token is replaced with runtime environment variable.",
+                            message=SECURITY["ENTROPY_MESSAGE"](entropy),
+                            suggested_fix=SECURITY["ENTROPY_FIX"],
                             code_snippet=line.strip()[:80],
                         )
                     )

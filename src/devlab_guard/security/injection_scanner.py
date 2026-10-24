@@ -6,6 +6,7 @@ Module: devlab_guard.security.injection_scanner
 from tree_sitter import Node, Tree
 
 from devlab_guard.core.models import Severity, Violation, ViolationCategory
+from devlab_guard.ui_copy import SECURITY
 
 DANGEROUS_CALLS: set[str] = {
     "queryRawUnsafe",
@@ -50,8 +51,8 @@ def _check_dangerous_calls(
                                 file_path=file_path,
                                 line_number=node.start_point.row + 1,
                                 column=node.start_point.column,
-                                message=f"Potential injection risk in dangerous call '{fn_name}' with unparameterized dynamic string.",
-                                suggested_fix="Use parameterized queries or prepared statements instead of string concatenation.",
+                                message=SECURITY["INJECTION_MESSAGE"](fn_name),
+                                suggested_fix=SECURITY["INJECTION_FIX"],
                                 code_snippet=source_bytes[node.start_byte : node.end_byte].decode(
                                     "utf-8", "ignore"
                                 )[:90],
