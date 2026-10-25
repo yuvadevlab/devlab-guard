@@ -32,3 +32,13 @@ build-backend = "uv_build"
 dev = [
     "ruff>=0.16.10",
 ]
+
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error::DeprecationWarning",
+    "default::DeprecationWarning",
+]
+
+[tool.mypy]
+enable_error_code = ["deprecated"]
