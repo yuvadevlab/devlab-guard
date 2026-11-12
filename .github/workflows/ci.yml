@@ -5,21 +5,15 @@ on:
     branches:
       - dev
       - main
-    types: [opened, synchronize, reopened, edited]
 
 permissions:
   contents: read
-  pull-requests: read
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  pr-lint:
-    name: 🔍 Validate PR & Branch
-    uses: yuvadevlab/.github/.github/workflows/reusable-pr-lint.yml@main
-
   format:
     name: 🎨 Verify Formatting with Ruff
     runs-on: ubuntu-latest
