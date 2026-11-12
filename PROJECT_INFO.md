@@ -86,10 +86,10 @@ Standard linters (like ESLint, Ruff, or standard CI checks) verify basic syntax 
 sequenceDiagram
     autonumber
     participant Dev as Developer / Git Hook
-    participant Guard as DevLab Guard (CLI / :8080)
+    participant Guard as DevLab Guard (CLI / :8000)
     participant Repo as Monorepo (orchestrai / finai / logs)
     participant CI as GitHub Actions CI
-    participant IA as IncidentAI (:8085)
+    participant IA as IncidentAI (:8001)
 
     Dev->>Guard: git commit (Triggers .husky/pre-commit)
     Guard->>Repo: 1. Parse ASTs across staged files
@@ -104,7 +104,7 @@ sequenceDiagram
     Dev->>CI: git push origin
     CI->>Guard: Run uv run devlab-guard scan in CI
     alt CI Guard Failure
-        CI->>IA: Notify IncidentAI of Policy Regression (:8085)
+        CI->>IA: Notify IncidentAI of Policy Regression (:8001)
     end
 ```
 
@@ -149,8 +149,8 @@ uv sync
 uv run ruff format
 uv run ruff check --fix
 
-# Start the local FastAPI server (:8080)
-uv run uvicorn devlab_guard.server:app --port 8080 --reload
+# Start the local FastAPI server (:8000 / Prod :8010)
+uv run uvicorn devlab_guard.server:app --port 8000 --reload
 ```
 
 ### 5.2 Running Architectural Scans
