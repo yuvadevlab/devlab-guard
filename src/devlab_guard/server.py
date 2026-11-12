@@ -11,11 +11,12 @@ from pydantic import BaseModel, Field
 from devlab_guard.core.models import GuardReport
 from devlab_guard.core.pipeline import run_pipeline
 from devlab_guard.ui_copy import API
+from devlab_guard.version import BUILD_METADATA, GUARD_VERSION
 
 app = FastAPI(
     title=API["TITLE"],
     description=API["DESCRIPTION"],
-    version="1.0.0",
+    version=GUARD_VERSION,
 )
 
 
@@ -31,12 +32,18 @@ class HealthResponse(BaseModel):
 
     status: str
     version: str
+    build: dict[str, str] = Field(default_factory=dict)
 
 
 @app.get("/health", response_model=HealthResponse)
+@app.get("/api/v1/health", response_model=HealthResponse)
 def health_check() -> HealthResponse:
     """Returns service health status."""
-    return HealthResponse(status="healthy", version="1.0.0")
+    return HealthResponse(
+        status="ok",
+        version=GUARD_VERSION,
+        build=BUILD_METADATA,
+    )
 
 
 @app.post("/api/v1/scan", response_model=GuardReport)
